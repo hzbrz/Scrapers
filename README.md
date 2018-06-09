@@ -1,1 +1,1 @@
-## These are scrapers that I build to download links and images from Imgur and Subreddits
+## These are scrapers that I built to download links and images from Imgur and Subreddits
