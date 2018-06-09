@@ -2,4 +2,4 @@ praw_config.py
 firebase_config.py
 geckodriver.exe
 geckodriver.log
-.Reddit Scraper/__pycache__/*
+__pycache__

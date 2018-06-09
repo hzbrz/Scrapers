@@ -1,5 +1,6 @@
 import praw_config, praw, re
 from dlr_helper import scrape_album_links, download_pics
+from load_to_firebase import upload_to_storage_db
 
 reddit = praw.Reddit(client_id=praw_config.client_id, 
                      client_secret=praw_config.client_secret, 
@@ -29,3 +30,7 @@ download_pics(pic_urls)
 print("\nDone with part 1")
 
 scrape_album_links(album_urls, "links")
+
+print("\nuploading to firebase")
+
+upload_to_storage_db()
