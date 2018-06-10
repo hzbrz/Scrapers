@@ -34,7 +34,7 @@ def upload_to_storage_db():
         # storing to firebase
         upload_image = storage.child(folder + '/' + str(i) + '.jpg').put(dir + '\\' + folder + '\\' + str(i) + '.jpg')
         # printing a tracking message
-        print('File uploaded', i, '/', len(os.listdir(dir + "\\" + folder)))
+        print('File uploaded', i+1, '/', len(os.listdir(dir + "\\" + folder)))
 
         # getting the download url and passing a token to the get_url() function from the upload
         data_url = storage.child(folder + '/' + str(i) + '.jpg').get_url(upload_image['downloadTokens'])
@@ -43,3 +43,5 @@ def upload_to_storage_db():
         data = {str(db_len + i) : data_url}
 
         db.child(folder).update(data)
+
+    print("Finished uploading to firebase")    

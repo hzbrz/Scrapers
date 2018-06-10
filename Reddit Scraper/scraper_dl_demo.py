@@ -8,7 +8,7 @@ reddit = praw.Reddit(client_id=praw_config.client_id,
 
 
 urls = []
-for submissions in reddit.subreddit('iWallpaper').hot(limit=50):
+for submissions in reddit.subreddit('iWallpaper').hot(limit=60):
     urls = urls + [submissions.url]
 
 
