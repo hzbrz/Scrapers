@@ -14,7 +14,7 @@ def upload_to_storage_db():
     dir = "C:\\Users\\wazih\\Desktop\\courses\\Images"
 
     now = datetime.datetime.now()
-    folder = now.strftime('%d_%m_%Y')
+    folder = now.strftime('%m_%d_%Y')
 
     # init firebase vars
     db = firebase.database()

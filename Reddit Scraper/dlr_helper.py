@@ -11,7 +11,7 @@ def generate_link(url):
 # downloading the links and storing it to folder
 def download_albums(filename):
     now = datetime.datetime.now()
-    folder_name = now.strftime('%d_%m_%Y')
+    folder_name = now.strftime('%m_%d_%Y')
 
     # handling the "cannot make directory when it exists" error
     dir = ''
@@ -128,7 +128,8 @@ def scrape_album_links(album_url, filename):
 def download_pics(pic_urls):
 
     now = datetime.datetime.now()
-    folder_name = now.strftime('%d_%m_%Y')
+    # folder name created as: month_day_year
+    folder_name = now.strftime('%m_%d_%Y')
 
     # handling the "cannot make directory when it exists" error
     dir = ''

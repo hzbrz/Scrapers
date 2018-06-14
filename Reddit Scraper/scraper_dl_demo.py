@@ -1,6 +1,8 @@
-import praw_config, praw, re
+import praw_config, praw, re, os
 from dlr_helper import scrape_album_links, download_pics
 from load_to_firebase import upload_to_storage_db
+
+dir = "C:\\Users\\wazih\\Desktop\\courses\\Images"
 
 reddit = praw.Reddit(client_id=praw_config.client_id, 
                      client_secret=praw_config.client_secret, 
@@ -8,7 +10,7 @@ reddit = praw.Reddit(client_id=praw_config.client_id,
 
 
 urls = []
-for submissions in reddit.subreddit('iWallpaper').hot(limit=60):
+for submissions in reddit.subreddit('iWallpaper').new(limit=250):
     urls = urls + [submissions.url]
 
 
@@ -17,7 +19,7 @@ imgur_regex = re.compile(r'((https|http)://imgur.com/a/\w+)|((https|http)://imgu
 album_urls = []
 pic_urls = []
 
-for url in urls[2:]:
+for url in urls:
     try:
         mo = imgur_regex.search(url)
         album_urls = album_urls + [mo.group()]
@@ -31,6 +33,8 @@ print("\nDone with part 1")
 
 scrape_album_links(album_urls, "links")
 
-print("\nuploading to firebase")
+print("\n now chuncking...")
 
-upload_to_storage_db()
+# print("\nuploading to firebase")
+
+# upload_to_storage_db()
