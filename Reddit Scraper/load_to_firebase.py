@@ -34,28 +34,29 @@ def upload_to_storage_db():
 
 
   # prepping for image counting and getting the length of db for db count
-  db_len = 0
+  len_db = 0
   next_folder_count = 0
 
   for folder in folders:
     try:
         images_from_db = db.child(folder).get()
-        db_len = len(images_from_db.val())
+        len_db = len(images_from_db.val())
     except TypeError:
-        db_len = 0
+        len_db = 0
 
     for i in range(len(os.listdir(dir + "\\" + folder))):
-        # storing to firebase
-        upload_image = storage.child(folder + '/' + str(i) + '.jpg').put(dir + '\\' + folder + '\\' + str(i+next_folder_count) + '.jpg')
+        # storing to firebase 
+        key = key_gen(4)
+        # they key is the download link and it will be unqiue so there is no download link overlap on phone
+        upload_image = storage.child(folder + '/' + key + '.jpg').put(dir + '\\' + folder + '\\' + str(i+next_folder_count) + '.jpg')
         # printing a tracking message
         print('File uploaded', i+1, '/', len(os.listdir(dir + "\\" + folder)))
 
         # getting the download url and passing a token to the get_url() function from the upload
-        data_url = storage.child(folder + '/' + str(i) + '.jpg').get_url(upload_image['downloadTokens'])
+        data_url = storage.child(folder + '/' + key + '.jpg').get_url(upload_image['downloadTokens'])
 
         # prepping the data to upload to the database with the download link from storage
-        key = key_gen(4)
-        data = {key : data_url}
+        data = {str(len_db+i) : data_url}
 
         db.child(folder).update(data)
 
