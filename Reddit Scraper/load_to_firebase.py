@@ -1,4 +1,4 @@
-import pyrebase, firebase_config, os, datetime, random
+import pyrebase, firebase_config, os, datetime, random, shutil
 
 config = {
   "apiKey": firebase_config.api_key,
@@ -46,7 +46,7 @@ def upload_to_storage_db():
 
     for i in range(len(os.listdir(dir + "\\" + folder))):
         # storing to firebase 
-        key = key_gen(4)
+        key = key_gen(5)
         # they key is the download link and it will be unqiue so there is no download link overlap on phone
         upload_image = storage.child(folder + '/' + key + '.jpg').put(dir + '\\' + folder + '\\' + str(i+next_folder_count) + '.jpg')
         # printing a tracking message
@@ -61,5 +61,7 @@ def upload_to_storage_db():
         db.child(folder).update(data)
 
     next_folder_count = next_folder_count + 100
+    # deleting folder after upload, so that it does not reupload next time bot runs
+    shutil.rmtree(dir + '\\' + folder)
 
   print("Finished uploading to firebase")    
