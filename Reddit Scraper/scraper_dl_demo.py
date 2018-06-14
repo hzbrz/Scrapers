@@ -10,38 +10,38 @@ dir = "C:\\Users\\wazih\\Desktop\\courses\\Images"
 # root_folder = now.strftime('%m_%d_%Y')
 
 
-# reddit = praw.Reddit(client_id=praw_config.client_id, 
-#                      client_secret=praw_config.client_secret, 
-#                      user_agent=praw_config.user_agent)
+reddit = praw.Reddit(client_id=praw_config.client_id, 
+                     client_secret=praw_config.client_secret, 
+                     user_agent=praw_config.user_agent)
 
 
-# urls = []
-# for submissions in reddit.subreddit('iWallpaper').new(limit=250):
-#     urls = urls + [submissions.url]
+urls = []
+for submissions in reddit.subreddit('iWallpaper').new(limit=50):
+    urls = urls + [submissions.url]
 
 
-# imgur_regex = re.compile(r'((https|http)://imgur.com/a/\w+)|((https|http)://imgur.com/gallery/\w+)')
+imgur_regex = re.compile(r'((https|http)://imgur.com/a/\w+)|((https|http)://imgur.com/gallery/\w+)')
 
-# album_urls = []
-# pic_urls = []
+album_urls = []
+pic_urls = []
 
-# for url in urls:
-#     try:
-#         mo = imgur_regex.search(url)
-#         album_urls = album_urls + [mo.group()]
-#     except AttributeError:
-#         pic_urls = pic_urls + [url]
+for url in urls:
+    try:
+        mo = imgur_regex.search(url)
+        album_urls = album_urls + [mo.group()]
+    except AttributeError:
+        pic_urls = pic_urls + [url]
 
 
-# download_pics(pic_urls)
+download_pics(pic_urls)
 
-# print("\nDone with part 1")
+print("\nDone with part 1")
 
-# scrape_album_links(album_urls, "links")
+scrape_album_links(album_urls, "links")
 
-# print("\n now chuncking...")
+print("\n now chuncking...")
 
-# chunker_mech(100, dir)
+chunker_mech(100, dir)
 
 print("\nuploading to firebase")
 
