@@ -57,7 +57,11 @@ def upload_to_storage_db():
         # storing to firebase 
         key = key_gen(5)
         # they key is the download link and it will be unqiue so there is no download link overlap on phone
-        upload_image = storage.child(folder + '/' + key + '.jpg').put(dir + '\\' + folder + '\\' + str(i+next_folder_count) + '.jpg', user['idToken'])
+        try:
+          upload_image = storage.child(folder + '/' + key + '.jpg').put(dir + '\\' + folder + '\\' + str(i+next_folder_count) + '.jpg', user['idToken'])
+        except FileNotFoundError:
+          upload_image = storage.child(folder + '/' + key + '.jpg').put(dir + '\\' + folder + '\\' + str(i) + '.jpg', user['idToken'])
+        
         # printing a tracking message
         print('File uploaded', i+1, '/', len(os.listdir(dir + "\\" + folder)))
 
@@ -71,6 +75,7 @@ def upload_to_storage_db():
         db.child(folder).update(data, user['idToken'])
 
     next_folder_count = next_folder_count + 100
+
     # deleting folder after upload, so that it does not reupload next time bot runs
     # shutil.rmtree(dir + '\\' + folder)
 
