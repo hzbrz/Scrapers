@@ -3,3 +3,4 @@ firebase_config.py
 geckodriver.exe
 geckodriver.log
 __pycache__
+image_hoster_service_cred.json
