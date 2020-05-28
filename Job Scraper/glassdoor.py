@@ -14,7 +14,7 @@ driver.get("https://www.glassdoor.com/Job/ashburn-junior-web-developer-jobs-SRCH
 job_on_page = driver.find_elements_by_class_name("jl")
 
 job_dict = {}
-for job in job_on_page[0:6]:
+for job in job_on_page:
   try:
     # each job element gets clicked
     job.click()
@@ -26,23 +26,20 @@ for job in job_on_page[0:6]:
     apply_element = driver.find_element_by_class_name("applyButton")
 
     # element manipualted
-    # link_name = apply_element.text
-    # company_name = company_element.text.split("\n")[0]
-    # job_title = title_element.text
-    company_html = company_element.get_attribute("innerHTML")
-    title_html = title_element.get_attribute("innerHTML")
-    print(company_html)
-    print("\n\n")
-    print(title_html)
+    link_name = apply_element.text
+    company_name = company_element.text.split("\n")[0]
+    company_name = company_name.split(".")[0]
+    job_title = title_element.text
 
+    # print(company_name)
     # if the apply link name is Easy Apply then we run the function to easy apply
-    # if link_name != "Easy Apply":
-    #   apply_link = apply_element.get_attribute("href")
-    #   job_dict[company_name] = { "job link": apply_link, "job title": job_title }
-    # else:
-    #   print("Easy apply")
-    #   job_dict[company_name] = { "job link": "easy", "job title": job_title }
-    #   easy_app(apply_element)
+    if link_name != "Easy Apply":
+      apply_link = apply_element.get_attribute("href")
+      job_dict[company_name] = { "job link": apply_link, "job title": job_title }
+    else:
+      print("Easy apply")
+      job_dict[company_name] = { "job link": "easy", "job title": job_title }
+      easy_app(apply_element)
     
   except WebDriverException:
     print("MODAL APPEARED")
