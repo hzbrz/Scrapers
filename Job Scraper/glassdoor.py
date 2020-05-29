@@ -14,12 +14,22 @@ driver.get("https://www.glassdoor.com/Job/ashburn-junior-web-developer-jobs-SRCH
 job_on_page = driver.find_elements_by_class_name("jl")
 
 # get pagination
-next_page_element = driver.find_element_by_xpath("//li[@class='page']/a")
-next_page = next_page_element.get_attribute("href")
-print(next_page)
-next_page_number = next_page.split("=")
-print(next_page_number)
-next_page.click()
+next_page_elements = driver.find_elements_by_xpath("//li[@class='page']")
+pages = [page for page in next_page_elements]
+last_page = driver.find_element_by_xpath("//li[@class='page last']")
+pages.append(last_page)
+
+for page_elem in pages:
+  try:
+    page_elem.click()
+    time.sleep(5)
+  except WebDriverException:
+    print("MODAL APPEARED")
+    modal_close = driver.find_element_by_class_name("modal_closeIcon")
+    modal_close.click()
+    time.sleep(2)
+    page_elem.click()
+    time.sleep(5)
 
 # job_dict = {}
 # for job in job_on_page:
