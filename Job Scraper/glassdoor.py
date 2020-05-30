@@ -66,6 +66,7 @@ def get_jobs(job_dict, jobRole, joblist):
   
   return job_dict
 
+# this dict is to check and update the dictionary
 job_dict = { "web developer": {} }
 for role in roles:
   # job type clicks 
@@ -106,8 +107,12 @@ for role in roles:
       # we change the dictionary with the role 
       job_dict = { "web developer": { role: {} } }
       job_dict = get_jobs(job_dict, role, job_on_page)
-    else:
+      # after I get the job dict back I insert the internship key
       job_dict["web developer"]["'internship'"] = {}
+    elif not job_dict["web developer"]["'internship'"]:
+      jobs = get_jobs(job_dict, role, job_on_page)
+    else:
+      # job_dict["web developer"]["'internship'"] = {}
       jobs = get_jobs(job_dict, role, job_on_page)
 
 job_coll.insert_one(jobs)
