@@ -14,4 +14,10 @@ driver1 = webdriver.Chrome()
 web_id = ids[0]
 
 glassdoor_scrape(web_id, driver1, job_types, 
-                 "web developer", "https://www.glassdoor.com/Job/ashburn-web-developer-jobs-SRCH_IL.0,7_IC1130338_KO8,21.htm")
+                 "web developer", "https://www.glassdoor.com/Job/herndon-web-developer-jobs-SRCH_IL.0,7_IC1130374_KO8,21.htm")
+
+driver2 = webdriver.Chrome()
+software_id = ids[1]
+glassdoor_scrape(software_id, driver2, job_types, 
+                 "software engineer", "https://www.glassdoor.com/Job/herndon-software-development-engineer-intern-jobs-SRCH_IL.0,7_IC1130374_KO8,44.htm")
+                 

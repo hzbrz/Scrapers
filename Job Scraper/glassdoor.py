@@ -5,8 +5,6 @@ from apply import easy_app
 from selenium.common.exceptions import WebDriverException
 from selenium.common.exceptions import NoSuchElementException
 
-# TODO: 1. update based on applied jobs 2. MOVE INTO mian.py, break into functions,
-
 # init db
 myclient = pymongo.MongoClient("mongodb://localhost:27017/")
 mydb = myclient["jobDB"]
@@ -85,7 +83,6 @@ def get_jobs(job_dict, jobType, joblist, jobRole, driver, db_links):
     else:
       print("Easy apply")
       if apply_link != "job has expired":
-        easy_app(apply_element)
         easy_apply_link = company_name + " " + job_title
 
       if easy_apply_link in db_links:
@@ -97,6 +94,9 @@ def get_jobs(job_dict, jobType, joblist, jobRole, driver, db_links):
           job_dict[jobRole][jobType][company_name+str(company_counter)] = { "job link": easy_apply_link, "job title": job_title }
         else:
           job_dict[jobRole][jobType][company_name] = { "job link": easy_apply_link, "job title": job_title }
+        # if the job is not expired and has not already been applied to
+        easy_app(apply_element)
+
   
   return job_dict
 
@@ -116,7 +116,7 @@ def glassdoor_scrape(db_id, driver, job_types, job_role, glassdoor_link):
 
       # click on the roles
       driver.find_element_by_xpath("//li[@value="+job_type+"]").click()
-      time.sleep(3)
+      time.sleep(2)
       
       # job list 
       job_on_page = driver.find_elements_by_class_name("jl")
@@ -177,7 +177,7 @@ def glassdoor_scrape(db_id, driver, job_types, job_role, glassdoor_link):
         job_type_elem.click()
         time.sleep(1)
         driver.find_element_by_xpath("//li[@value="+job_type+"]").click()
-        time.sleep(3)
+        time.sleep(2)
         job_on_page = driver.find_elements_by_class_name("jl")
 
         job_dict = { job_role: { job_type: {} } }
@@ -189,7 +189,3 @@ def glassdoor_scrape(db_id, driver, job_types, job_role, glassdoor_link):
         print(jobs)
 
     driver.close()
-
-    'https://www.glassdoor.com/partner/jobListing.htm?&ao=961248&s=58&src=GD_JOB_VIEW&t=SR&vt=w&jobListingId=3568765112'
-
-    'https://www.glassdoor.com/partner/jobListing.htm?pos=101&ao=961248&s=58&src=GD_JOB_VIEW&t=SR&vt=w&jobListingId=3568765112'
