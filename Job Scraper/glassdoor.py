@@ -53,16 +53,23 @@ def get_jobs(job_dict, jobType, joblist, jobRole, driver, db_links):
       # only get link if the apply now button exists
       if apply_link != "job has expired":
         apply_link = apply_element.get_attribute("href")
+
         # removing the GUID so that the links can be checked again to see if applied
         guid_removed = apply_link.split("&guid=")
         src_removed = guid_removed[1].split("&src")[1]
         # apply link with unique guid removed
         apply_link = guid_removed[0] + "&src" + src_removed
-        # cs and cb id removed
+
+        # removing the 'cs=' part from the link
         cs_removed = apply_link.split("&cs=")
+        # getting the first part of the link constant
+        first_part_link = cs_removed[0].split("?")[0]
+        # removing the 'pos=' part from the link
+        pos_removed = "?&ao" + cs_removed[0].split("?")[1].split("&ao")[1]
+        # removing the 'cb=' part from the link
         cb_removed = guid_removed[1].split("&cb")[1].split("&")
         # actual apply link
-        apply_link = cs_removed[0] + "&" + cb_removed[1]
+        apply_link = first_part_link + pos_removed + "&" + cb_removed[1]
 
       if apply_link in db_links:
         print("JOB HAS BEEN ALREADY APPLIED")
@@ -182,3 +189,7 @@ def glassdoor_scrape(db_id, driver, job_types, job_role, glassdoor_link):
         print(jobs)
 
     driver.close()
+
+    'https://www.glassdoor.com/partner/jobListing.htm?&ao=961248&s=58&src=GD_JOB_VIEW&t=SR&vt=w&jobListingId=3568765112'
+
+    'https://www.glassdoor.com/partner/jobListing.htm?pos=101&ao=961248&s=58&src=GD_JOB_VIEW&t=SR&vt=w&jobListingId=3568765112'
