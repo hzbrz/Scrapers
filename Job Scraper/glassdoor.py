@@ -14,7 +14,7 @@ job_coll = mydb["jobs"]
 def get_jobs(job_dict, jobType, joblist, jobRole, driver, db_links):
   # this counter is to avoid duplicate keys because of same companies posting different positions
   company_counter = 0
-  for job in joblist[:5]:
+  for job in joblist[:3]:
     try:
       # each job element gets clicked
       job.click() 
@@ -97,7 +97,6 @@ def get_jobs(job_dict, jobType, joblist, jobRole, driver, db_links):
         # if the job is not expired and has not already been applied to
         easy_app(apply_element)
 
-  
   return job_dict
 
   
@@ -117,9 +116,6 @@ def glassdoor_scrape(db_id, driver, job_types, job_role, glassdoor_link):
       # click on the roles
       driver.find_element_by_xpath("//li[@value="+job_type+"]").click()
       time.sleep(2)
-      
-      # job list 
-      job_on_page = driver.find_elements_by_class_name("jl")
 
       # get pagination
       try: 
@@ -130,8 +126,13 @@ def glassdoor_scrape(db_id, driver, job_types, job_role, glassdoor_link):
       except NoSuchElementException:
         print("NO PAGINATION/ ONLY 1 PAGE")
 
+      print(pages)
+
       if len(pages) > 0:
-        for page_elem in pages:
+        page_counter = 0
+        while page_counter <= len(pages):
+          # job list 
+          job_on_page = driver.find_elements_by_class_name("jl")
           if not job_dict[job_role]:
             job_dict = { job_role: { job_type: {} } }
             job_dict = get_jobs(job_dict, job_type, job_on_page, job_role, driver, [])
@@ -142,10 +143,17 @@ def glassdoor_scrape(db_id, driver, job_types, job_role, glassdoor_link):
           else:
             jobs = get_jobs(job_dict, job_type, job_on_page, job_role, driver, [])
 
-          # after getting the jobs on that page clicking to next page
-          page_elem.click()
-          time.sleep(2)
+          if page_counter != len(pages):
+            # after getting the jobs on that page clicking to next page
+            pages[page_counter].click()
+            time.sleep(2)
+            page_counter = page_counter + 1
+          else:
+            print("end of pages")
+            page_counter = page_counter + 1
       else:
+        # job list 
+        job_on_page = driver.find_elements_by_class_name("jl")
         if not job_dict[job_role]:
           # we change the dictionary with the role 
           job_dict = { job_role: { job_type: {} } }
@@ -187,5 +195,7 @@ def glassdoor_scrape(db_id, driver, job_types, job_role, glassdoor_link):
         jobs = get_jobs(job_dict, job_type, job_on_page, job_role, driver, job_links)
         print(job_links, "\n\n")
         print(jobs)
+
+        # TODO: update db with jobs that has not been applied to
 
     driver.close()
