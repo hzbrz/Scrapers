@@ -1,5 +1,6 @@
 import time
 import pymongo
+import uuid
 from bson import ObjectId
 from apply import easy_app
 from selenium.common.exceptions import WebDriverException
@@ -11,10 +12,10 @@ mydb = myclient["jobDB"]
 job_coll = mydb["jobs"]
 
 
-def get_jobs(job_dict, jobType, joblist, jobRole, driver, db_links):
+def get_jobs(job_dict, jobType, joblist, jobRole, driver, db_companies, db_titles):
   # this counter is to avoid duplicate keys because of same companies posting different positions
   company_counter = 0
-  for job in joblist[:9]:
+  for job in joblist[:5]:
     try:
       # each job element gets clicked
       job.click() 
@@ -52,27 +53,9 @@ def get_jobs(job_dict, jobType, joblist, jobRole, driver, db_links):
       if apply_link != "job has expired":
         apply_link = apply_element.get_attribute("href")
 
-        # removing the GUID so that the links can be checked again to see if applied
-        guid_removed = apply_link.split("&guid=")
-        src_removed = guid_removed[1].split("&src")[1]
-        # apply link with unique guid removed
-        apply_link = guid_removed[0] + "&src" + src_removed
-
-        # removing the 'cs=' part from the link
-        cs_removed = apply_link.split("&cs=")
-        # getting the first part of the link constant
-        first_part_link = cs_removed[0].split("?")[0]
-        # removing the 'pos=' part from the link
-        pos_removed = "?&ao" + cs_removed[0].split("?")[1].split("&ao")[1]
-        # removing the 'cb=' part from the link
-        cb_removed = guid_removed[1].split("&cb")[1].split("&")\
-
-        # actual apply link
-        apply_link = first_part_link + pos_removed + "&" + cb_removed[1]
-        # the link for checking if job has been applied
-        check_link = first_part_link + pos_removed
-
-      if check_link in db_links:
+      # print("CONDITION FOR JOB APPLIED: ", company_name in db_companies and job_title in db_titles, "\n")
+      # print(company_name, job_title, "\n")
+      if company_name in db_companies and job_title in db_titles:
         print("JOB HAS BEEN ALREADY APPLIED")
       else:
         # if the key already exists, this happens when the same company posts a different position
@@ -88,8 +71,8 @@ def get_jobs(job_dict, jobType, joblist, jobRole, driver, db_links):
       if apply_link != "job has expired":
         easy_apply_link = company_name + " " + job_title
 
-      if easy_apply_link in db_links:
-        print("JOB HAS BEEN ALREADY APPLIED")
+      if company_name in db_companies and job_title in db_titles:
+        print("EASY JOB HAS BEEN ALREADY APPLIED")
       else:
         if company_name in  job_dict[jobRole][jobType].keys():
           company_counter+=1
@@ -136,16 +119,16 @@ def glassdoor_scrape(db_id, driver, job_types, job_role, glassdoor_link):
           job_on_page = driver.find_elements_by_class_name("jl")
           if not job_dict[job_role]:
             job_dict = { job_role: { job_type: {} } }
-            job_dict = get_jobs(job_dict, job_type, job_on_page, job_role, driver, [])
+            job_dict = get_jobs(job_dict, job_type, job_on_page, job_role, driver, [], [])
 
             job_dict[job_role]["'internship'"] = {}
             # print("IN If: ", job_dict, "PAGE COUNTER", page_counter)
           elif not job_dict[job_role][job_type]:
             # print("IN ELIF: ", job_dict, "PAGE COUNTER", page_counter)
-            jobs = get_jobs(job_dict, job_type, job_on_page, job_role, driver, [])
+            jobs = get_jobs(job_dict, job_type, job_on_page, job_role, driver, [], [])
           else:
             # print("IN ELSE: ", job_dict, "PAGE COUNTER", page_counter)
-            jobs = get_jobs(job_dict, job_type, job_on_page, job_role, driver, [])
+            jobs = get_jobs(job_dict, job_type, job_on_page, job_role, driver, [], [])
             print("AFTER ELSE: ", jobs)
 
           if page_counter != len(pages):
@@ -162,13 +145,13 @@ def glassdoor_scrape(db_id, driver, job_types, job_role, glassdoor_link):
         if not job_dict[job_role]:
           # we change the dictionary with the role 
           job_dict = { job_role: { job_type: {} } }
-          job_dict = get_jobs(job_dict, job_type, job_on_page, job_role, driver, [])
+          job_dict = get_jobs(job_dict, job_type, job_on_page, job_role, driver, [], [])
           # after I get the job dict back I insert the internship key
           job_dict[job_role]["'internship'"] = {}
         elif not job_dict[job_role][job_type]:
-          jobs = get_jobs(job_dict, job_type, job_on_page, job_role, driver, [])
+          jobs = get_jobs(job_dict, job_type, job_on_page, job_role, driver, [], [])
         else:
-          jobs = get_jobs(job_dict, job_type, job_on_page, job_role, driver, [])  
+          jobs = get_jobs(job_dict, job_type, job_on_page, job_role, driver, [], [])  
 
     job_db_id = job_coll.insert_one(jobs)
     # writing to the file the id
@@ -192,23 +175,59 @@ def glassdoor_scrape(db_id, driver, job_types, job_role, glassdoor_link):
         # click on the job type
         driver.find_element_by_xpath("//li[@value="+job_type+"]").click()
         time.sleep(2)
-        # get the job on page based on the job type
-        job_on_page = driver.find_elements_by_class_name("jl")
+
+        try: 
+          next_page_elements = driver.find_elements_by_xpath("//li[@class='page']")
+          pages = [page for page in next_page_elements]
+          last_page = driver.find_element_by_xpath("//li[@class='page last']")  
+          pages.append(last_page)
+        except NoSuchElementException:
+          print("UPDATE: NO PAGINATION/ ONLY 1 PAGE")
+
+        # company names and job titles from db
+        company_names = [key for key in job[job_role][job_type].keys()]
+        print(company_names)
+        job_titles = [job[job_role][job_type][key]['job title'] for key in job[job_role][job_type].keys()]
+        print(job_titles)
+
         # the dict has to be init here so that it gets rewrote every loop and this way the database is updated correctly
         job_dict = { job_role: { job_type: {} } }
+        if len(pages) > 0:
+          page_counter = 0
+          while page_counter <= len(pages):
+            # job list 
+            job_on_page = driver.find_elements_by_class_name("jl")
+            jobs = get_jobs(job_dict, job_type, job_on_page, job_role, driver, company_names, job_titles)
 
-        job_links = [job[job_role][job_type][key]['job link'] for key in job[job_role][job_type].keys()]
-        # getting rid of the joblistId for checking purposes
-        job_links = [job.split("&job")[0] for job in job_links]
+            if page_counter != len(pages):
+              # after getting the jobs on that page clicking to next page
+              pages[page_counter].click()
+              time.sleep(2)
+              page_counter = page_counter + 1
+            else:
+              print("end of pages")
+              page_counter = page_counter + 1
+        else:
+          # job list 
+          job_on_page = driver.find_elements_by_class_name("jl")
+          jobs = get_jobs(job_dict, job_type, job_on_page, job_role, driver, company_names, job_titles)
         
-        jobs = get_jobs(job_dict, job_type, job_on_page, job_role, driver, job_links)
+        # looping through keys and checking 
+        keys_from_update = jobs[job_role][job_type].keys()
+        for job_key in keys_from_update:
+          if job_key in company_names:
+            # updating the old key with the new key
+            unique_id = str(uuid.uuid4()).split("-")[0]
+            jobs[job_role][job_type][job_key+"-"+unique_id] = jobs[job_role][job_type][job_key]
+            # then deleting the old key
+            del jobs[job_role][job_type][job_key]
         
-        print("jobs from ", job_type, " ", jobs, "\n\n")
-        print("FROM DB ", job[job_role].keys(), "\n\n")
-        print("FROM UPDATED", job_type, " ", jobs[job_role][job_type], "\n\n", jobs)
+        job[job_role][job_type].update(jobs[job_role][job_type])
+        # print("AFTER JOB: ", job, "\n\n")
+        # print("AFTER JOB ROLE: ", job[job_role], "\n\n")
         update = job_coll.find_one_and_update(
           {"_id": job_db_id},
-          {"$set": { job_role: jobs[job_role][job_type] } }
+          {"$set": { job_role: job[job_role] } }
         )
 
     driver.close()
